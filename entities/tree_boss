@@ -1,1 +1,42 @@
+import pygame
+import random
+import math
+from settings import *
+from entities.enemy import Enemy
 
+class TreeBoss(Enemy):
+    def __init__(self, x, y):
+        super().__init__(x, y, BOSS_BASE_HEALTH * 2, "tree_boss")
+        self.speed = 100  # Trees don't move fast!
+        self.attack_cooldown = 0
+        self.attack_pattern = []
+        self.current_attack = 0
+        self.attacks = []
+        self.stun_meter = 0
+        self.stun_threshold = 150
+        self.stunned = False
+        self.stun_timer = 0
+        
+        # Tree-specific attributes
+        self.roots = 5  # Number of active roots
+        self.seed_pods = 3  # Number of seed pods for attacks
+        
+        # Phases
+        self.phase = 1
+        self.phase2_threshold = self.max_health * 0.6
+        self.phase3_threshold = self.max_health * 0.3
+        
+        # Initialize attack patterns
+        self.init_attack_patterns()
+        
+    def init_attack_patterns(self):
+        # Phase 1 patterns (basic attacks)
+        self.phase1_patterns = [
+            [{"type": "root_strike", "damage": 25, "windup": 0.8, "duration": 0.4, "cooldown": 2.0}],
+            [{"type": "root_slam", "damage": 40, "windup": 1.0, "duration": 0.5, "cooldown": 3.0}],
+            [{"type": "seed_burst", "damage": 15, "windup": 0.6, "duration": 1.0, "cooldown": 2.5}]
+        ]
+        
+        # Phase 2 patterns (more aggressive)
+        self.phase2_patterns = [
+            [{"type": "root_strike", "damage":
