@@ -1,42 +1,45 @@
-import pygame
-from settings import *
 
-class Enemy:
-    def __init__(self, x, y, health, enemy_type):
-        self.position = pygame.Vector2(x, y)
-        self.velocity = pygame.Vector2(0, 0)
-        self.rect = pygame.Rect(x - 25, y - 50, 50, 50)
-        self.max_health = health
-        self.health = health
-        self.type = enemy_type
-        self.facing_right = False
-        self.on_ground = False
-        self.attacks = []
+import pygame
+import random
+from settings import *
+from entities.enemy import Enemy
+
+class Skeleton(Enemy):
+    def __init__(self, x, y):
+        super().__init__(x, y, 50, "skeleton")
+        self.speed = 120
+        self.attack_cooldown = 0
+        self.attack_range = 60
         
     def update(self, dt, player):
-        # Update attack timers
-        for attack in self.attacks[:]:
-            attack['timer'] -= dt
-            if attack['timer'] <= 0:
-                self.attacks.remove(attack)
-                
-        # Apply gravity
-        self.velocity.y += GRAVITY * dt
-        self.position += self.velocity * dt
-        self.rect.midbottom = self.position
+        super().update(dt, player)
         
-    def take_damage(self, damage):
-        self.health -= damage
-        return self.health <= 0
+        # Basic AI movement
+        direction = player.position - self.position
+        distance = direction.length()
         
-    def die(self):
-        pass  # To be overridden by specific enemies
-        
-    def reset(self):
-        self.health = self.max_health
-        self.attacks = []
-        self.velocity = pygame.Vector2(0, 0)
-        
+        if distance < self.attack_range and self.attack_cooldown <= 0:
+            # Attack player
+            attack_rect = pygame.Rect(self.rect.x - 10, self.rect.y, 
+                                    self.rect.width + 20, self.rect.height)
+            self.attacks.append({
+                "rect": attack_rect,
+                "damage": 10,
+                "timer": 0.2
+            })
+            self.attack_cooldown = 1.5
+        elif distance < 300:
+            # Move towards player
+            if direction.length() > 0:
+                direction = direction.normalize()
+            self.velocity.x = direction.x * self.speed
+            self.facing_right = direction.x > 0
+        else:
+            self.velocity.x = 0
+            
+        if self.attack_cooldown > 0:
+            self.attack_cooldown -= dt
+            
     def draw(self, screen):
-        # Basic enemy drawing (should be overridden)
-        pygame.draw.rect(screen, RED, self.rect)
+        color = (200, 200, 200) if not self.invincible else (230, 230, 230)
+        pygame.draw.rect(screen, color, self.rect)
