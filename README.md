@@ -1,2 +1,3 @@
 # Young-Necklace
-Elden Ring based 2D game
+2D-Game built in pygame
+Takes heavy inspiration from Elden Ring
