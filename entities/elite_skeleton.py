@@ -1,4 +1,5 @@
 import pygame
+import random
 from entities.enemy import Enemy
 from settings import *
 
